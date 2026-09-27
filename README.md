@@ -1,61 +1,53 @@
-# OpenSource-GenAI
+# OpenSource-GenAI — illustrated story generation
 
-An AI-powered pipeline that generates illustrated stories from text prompts using open-source models. Built with Google Gemini for story generation and FLUX.1 Schnell for image synthesis.
+A two-step Python experiment that turns an LLM-generated story outline into **character portraits and scene images**. Gemini writes a structured story; Hugging Face Inference serves **FLUX.1-schnell** to render the visual prompts. Sample story data and generated images are included so the output format is visible without running the APIs.
 
-## What It Does
+```text
+Gemini (LangChain ChatGoogleGenerativeAI)
+       ↓ structured story_data.json
+       ├── characters[*].characterPrompt → FLUX.1-schnell → char*.jpg
+       └── scenes[*].settingPrompt      → FLUX.1-schnell → scene*.jpg
+                                            + image_generation_results.json
+```
 
-Takes a simple theme (e.g., "magical forest adventure") and automatically:
-- Generates a structured story with characters and scenes using **Gemini API**
-- Creates matching images for characters and scenes using **FLUX.1 Schnell** (Hugging Face)
-- Saves story data as JSON and images in organized folders
+## What is implemented
 
-## Tech Stack
+- `generate_story.py` asks Gemini for JSON containing character identities, scene descriptions, narration text, visual prompts, and motion/duration fields. The current prompt asks the model to **choose its own theme**; there is no CLI theme argument.
+- `generate_images.py` strips optional Markdown fences, parses the story JSON, generates one image per valid character and one per scene through `huggingface_hub.InferenceClient`, and writes an index of saved file paths.
+- `story_data.json` and `generated_images/` include an example result. Those examples are artifacts, not guarantees that the same outputs will be reproduced on another run.
 
-- **Python** - Core language
-- **Google Gemini API** - Story and narrative generation
-- **FLUX.1 Schnell** - Fast, open-source text-to-image model (12B parameters)
-- **Hugging Face** - Model hosting and inference
+**Scope:** The pipeline generates still images. It does not render a video, synthesize audio, automatically compose characters into scene backgrounds, or enforce visual identity across independently generated images. `FLUX.1-schnell` is an externally hosted open-weight image model here; this repository does not train or fine-tune it.
 
-## Project Structure
+## Quick start
 
-OpenSource-GenAI/
-├── generate_story.py # Gemini-powered story generation
-├── generate_images.py # FLUX.1 image synthesis
-├── story_data.json # Generated story structure
-└── generated_images/ # Output images
+Python 3.10+ and working API credentials for Gemini and Hugging Face Inference are needed for a fresh run.
 
-## Quick Start
+```bash
+python -m venv .venv
+source .venv/bin/activate                   # Windows: .venv\Scripts\activate
+pip install langchain-google-genai huggingface_hub python-dotenv pillow
+```
 
-Install dependencies
-pip install google-generativeai huggingface_hub pillow requests python-dotenv
+Create an untracked `.env` at the repo root:
 
-Set up API keys in .env
-GEMINI_API_KEY=your_key
-HF_TOKEN=your_token
+```dotenv
+GOOGLE_API_KEY=your-gemini-api-key
+HF_TOKEN=your-hugging-face-token
+```
 
-Generate story and images
+Run the scripts **from the repository root**, in order:
+
+```bash
 python generate_story.py
 python generate_images.py
+```
 
-## Output Example
+`generate_story.py` writes the model response directly to `story_data.json`; `generate_images.py` attempts to clean/parse that response and then overwrites the file with formatted JSON. If Gemini returns invalid JSON, image generation stops. The image step needs `HF_TOKEN` even if you only intend to parse the sample file, because the token is checked at import time.
 
-**story_data.json** contains:
-- Characters with names and image prompts
-- Scenes with descriptions and visual details
-- Structured data ready for further processing
+The image step writes JPGs into `generated_images/` and a `generated_images/image_generation_results.json` manifest. Failed image requests are logged; a manifest entry can contain a `null` file path, so check it before using generated artifacts downstream. Hugging Face availability, model access, and inference charges/quotas depend on your account/provider.
 
-**generated_images/** contains:
-- Character images (char1.png, char2.png, etc.)
-- Scene backgrounds (scene1.png, scene2.png, etc.)
+## Design choices and next steps
 
-## Why These Models?
+The JSON schema serves as a small **interface contract** between text and image generation: one model produces reusable prompt data while the next stage consumes character and setting prompts separately. Useful extensions would be schema validation before writing, a user-supplied theme option, reproducible generation metadata, and consistent character compositing. These are next steps, not features already implemented.
 
-- **Gemini**: Advanced language understanding for coherent storytelling
-- **FLUX.1 Schnell**: Apache 2.0 licensed, generates images in 2-4 seconds with quality rivaling proprietary models
-
-## Use Cases
-
-- Content creation for social media
-- Educational storytelling materials
-- Rapid prototyping for creative projects
-- Visual content generation at scale
+**Note:** The `GOOGLE_API_KEY` variable and `langchain-google-genai` dependency above reflect the actual code; an older repository README listed a different Gemini package and key name. Never commit `.env` or API tokens.
