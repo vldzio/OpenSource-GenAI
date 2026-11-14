@@ -1,0 +1,28 @@
+# Render blueprint: same container as the Hugging Face Space recipe (private gateway + demo API).
+# Secrets are created empty here (sync: false); set them in the Render dashboard.
+services:
+  - type: web
+    name: genai-demo-api
+    runtime: docker
+    plan: free
+    branch: demo-ready
+    dockerfilePath: ./deploy/space/Dockerfile
+    dockerContext: ./deploy/space
+    healthCheckPath: /healthz
+    envVars:
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: FREEAPI_CONFIG_JSON
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: RL_GLOBAL_DAILY
+        value: "300"

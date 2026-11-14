@@ -1,0 +1,88 @@
+{
+  "characters": [
+    {
+      "characterId": "char1",
+      "name": "Elara",
+      "characterPrompt": "A young woman, Elara, with vibrant green eyes and long, flowing auburn hair braided with silver threads. Her face is freckled and expressive, with a determined set to her jaw. She wears practical, earth-toned clothing: a patched-up leather vest over a simple linen shirt, and sturdy brown trousers tucked into worn leather boots. She carries a small, intricately carved wooden flute. Around 20 years old. Her style is rustic and slightly fantastical, suggesting a life spent outdoors."
+    },
+    {
+      "characterId": "char2",
+      "name": "The Whispering Tree",
+      "characterPrompt": "An ancient, towering oak tree with a face etched into its bark. The face is wise and weathered, with deep-set eyes that seem to glow faintly with an inner light. Its branches are gnarled and reaching, adorned with glowing, bioluminescent moss. The tree's leaves are a mix of vibrant green and shimmering gold. It exudes an aura of ancient power and serenity. The tree is not mobile but its face is expressive."
+    }
+  ],
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "sceneDescription": "Elara approaches a massive, ancient oak tree at the edge of a misty forest. Sunlight filters through the leaves, creating dappled patterns on the forest floor.",
+      "audioText": "Sound of gentle wind rustling leaves, distant birdsong. Elara's soft footsteps on the forest floor.",
+      "characterIds": [
+        "char1"
+      ],
+      "characterContext": "Elara cautiously approaches the tree, her eyes wide with a mix of awe and apprehension. She clutches her wooden flute tightly.",
+      "settingPrompt": "A mystical forest clearing bathed in soft, diffused sunlight. Ancient, moss-covered trees surround a central, colossal oak. Mist hangs low to the ground, creating an ethereal atmosphere. The scene is peaceful and magical.",
+      "startingSettingPrompt": "Elara stands at the edge of the clearing, looking towards the tree. The tree is silent and still.",
+      "endingSettingPrompt": "Elara takes a few steps closer to the tree, her gaze fixed on its trunk.",
+      "motionPrompt": "Gentle swaying of leaves in the breeze. Subtle movement of mist.",
+      "durationSeconds": 8
+    },
+    {
+      "sceneNumber": 2,
+      "sceneDescription": "Close-up on the oak tree's trunk. A face slowly forms within the bark, its eyes opening and looking directly at Elara.",
+      "audioText": "A low, rumbling sound, like the earth groaning. A faint whisper: 'Approach...'",
+      "characterIds": [
+        "char2"
+      ],
+      "characterContext": "The tree's face is initially still and stoic, then slowly comes to life, its eyes widening and focusing on Elara. The expression is welcoming but also carries a hint of sadness.",
+      "settingPrompt": "Extreme close-up on the weathered bark of the ancient oak. The bark is deeply textured, with intricate patterns and glowing moss. The light is focused on the emerging face, highlighting its details.",
+      "startingSettingPrompt": "The tree's bark is smooth and unremarkable, with no discernible features.",
+      "endingSettingPrompt": "The tree's face is fully formed, its eyes open and staring directly at Elara.",
+      "motionPrompt": "The face slowly emerges from the bark, lines deepening, eyes opening.",
+      "durationSeconds": 7
+    },
+    {
+      "sceneNumber": 3,
+      "sceneDescription": "Elara, now standing directly in front of the tree, raises her flute to her lips. The tree's face watches her intently.",
+      "audioText": "A hesitant breath, followed by the first few notes of a haunting melody played on the flute.",
+      "characterIds": [
+        "char1",
+        "char2"
+      ],
+      "characterContext": "Elara is nervous but determined. She closes her eyes as she begins to play, pouring her heart into the music. The tree's face softens as it listens.",
+      "settingPrompt": "Elara standing close to the ancient oak tree. The surrounding forest is slightly darker, emphasizing the glow emanating from the tree and Elara. The atmosphere is charged with anticipation.",
+      "startingSettingPrompt": "Elara stands silently before the tree, holding her flute.",
+      "endingSettingPrompt": "Elara is playing the flute, her eyes closed, lost in the music. The tree's face is listening intently.",
+      "motionPrompt": "Elara's fingers move gracefully over the flute. Subtle shimmering effect around the tree as the music plays.",
+      "durationSeconds": 10
+    },
+    {
+      "sceneNumber": 4,
+      "sceneDescription": "As Elara plays, the leaves on the tree begin to glow brighter. The surrounding forest comes alive with bioluminescent plants and creatures.",
+      "audioText": "The flute melody becomes more complex and powerful. The sound of the forest responding to the music: rustling leaves, chirping insects, and the soft glow of bioluminescence.",
+      "characterIds": [
+        "char2"
+      ],
+      "characterContext": "The tree is still and listening. Its face radiates peace and gratitude.",
+      "settingPrompt": "The forest is now fully illuminated by bioluminescence. The trees glow with vibrant colors, and strange, beautiful creatures flit through the air. The atmosphere is magical and vibrant.",
+      "startingSettingPrompt": "The forest is dimly lit, with only the faintest signs of bioluminescence.",
+      "endingSettingPrompt": "The forest is ablaze with light and life, all responding to Elara's music.",
+      "motionPrompt": "Bioluminescent plants and creatures light up the forest. The leaves on the tree glow brighter and brighter.",
+      "durationSeconds": 10
+    },
+    {
+      "sceneNumber": 5,
+      "sceneDescription": "Elara finishes playing. The forest slowly returns to its normal state, the bioluminescence fading. The tree's face smiles gently.",
+      "audioText": "The final note of the flute fades away. A soft sigh from the tree. A faint whisper: 'Thank you...'",
+      "characterIds": [
+        "char1",
+        "char2"
+      ],
+      "characterContext": "Elara lowers her flute, her face filled with relief and wonder. She looks at the tree with a newfound understanding. The tree's face is smiling, its eyes filled with gratitude.",
+      "settingPrompt": "The forest is slowly returning to its original, misty state. The bioluminescence is fading, leaving a soft, ethereal glow. The atmosphere is peaceful and serene.",
+      "startingSettingPrompt": "The forest is fully illuminated by bioluminescence.",
+      "endingSettingPrompt": "The forest is returning to its misty state. Elara and the tree are connected through a shared moment of understanding.",
+      "motionPrompt": "The bioluminescence slowly fades away. The tree's face smiles.",
+      "durationSeconds": 10
+    }
+  ]
+}

@@ -51,3 +51,12 @@ The image step writes JPGs into `generated_images/` and a `generated_images/imag
 The JSON schema serves as a small **interface contract** between text and image generation: one model produces reusable prompt data while the next stage consumes character and setting prompts separately. Useful extensions would be schema validation before writing, a user-supplied theme option, reproducible generation metadata, and consistent character compositing. These are next steps, not features already implemented.
 
 **Note:** The `GOOGLE_API_KEY` variable and `langchain-google-genai` dependency above reflect the actual code; an older repository README listed a different Gemini package and key name. Never commit `.env` or API tokens.
+
+## Live web demo
+
+[`demo/`](demo) is a static UI (Vercel) and [`demo_api/`](demo_api) its FastAPI backend (Hugging Face Space with a private [FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi) gateway):
+
+* **Write story** - the LLM runs this repo's own story prompt (optionally with a visitor theme) and the result is schema-validated JSON, same structure as `story_data.json`.
+* **Generate image** - FLUX.1-schnell through Hugging Face Inference, per character/scene prompt. Uses the Space's `HF_TOKEN` (small daily allowance per visitor) or the visitor's own token.
+* The **Sample** tab shows the real story and images committed from an earlier run, clearly labelled.
+* All LLM calls are traced to LangSmith (`genai-demo`). Deploy: [`deploy/space/`](deploy/space) and [`vercel.json`](vercel.json) (set `DEMO_API_URL`). Tests: `pip install -r demo_api/requirements.txt pytest && pytest tests`.
