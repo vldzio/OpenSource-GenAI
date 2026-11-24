@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Illustrated Story Generator</title>
+<meta name="description" content="An LLM writes a structured short story; FLUX.1-schnell illustrates each character and scene.">
+<link rel="stylesheet" href="base.css">
+<style>
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}.row input{flex:1;min-width:200px}
+  .tabs{display:flex;gap:8px;margin:16px 0 4px}.tabs button{background:transparent;color:var(--accent)}.tabs button[aria-selected=true]{background:var(--accent);color:var(--accent-text)}
+  .cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .shot{aspect-ratio:1/1;width:100%;border-radius:10px;border:1px dashed var(--border);background:var(--code);display:grid;place-items:center;color:var(--muted);overflow:hidden;font-size:14px}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .tag{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  details summary{cursor:pointer;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Illustrated Story Generator</h1>
+  <p class="lead">An LLM writes a structured short story (characters + scenes with visual prompts); <strong>FLUX.1-schnell</strong> turns those prompts into pictures. Both steps run live.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-live" aria-selected="true" type="button">Generate</button>
+    <button role="tab" id="tab-sample" aria-selected="false" type="button">Sample from the repo's earlier run</button>
+  </div>
+
+  <section id="live">
+    <div class="card">
+      <label for="theme">Theme (optional, leave empty to let the model choose)</label>
+      <div class="row"><input id="theme" maxlength="200" placeholder="e.g. a lighthouse keeper who befriends a storm"><button id="write" type="button">Write story</button><span id="status" class="status" role="status"></span></div>
+      <div id="err" class="err" role="alert"></div>
+      <details style="margin-top:10px"><summary>Image generation limits</summary>
+        <p class="muted">Images use free Hugging Face inference credits, so each visitor gets only a few per day. Paste your own Hugging Face token to bypass the shared limit (kept in this tab only).</p>
+        <div class="row"><input id="hf" type="password" autocomplete="off" placeholder="hf_… (optional)"><button id="hf-save" class="secondary" type="button">Use token</button></div>
+      </details>
+    </div>
+    <div id="story"></div>
+  </section>
+
+  <section id="sample" hidden>
+    <p class="muted">These are the real story and images committed to the repo from an earlier run (Gemini + FLUX.1-schnell), shown for reference. Use <em>Generate</em> for a fresh one.</p>
+    <div id="sample-story"></div>
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="byo.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const HF = "demo.hf.token";
+const getHf = () => { try { return sessionStorage.getItem(HF) || ""; } catch (_) { return ""; } };
+$("hf-save").addEventListener("click", () => { try { sessionStorage.setItem(HF, $("hf").value.trim()); } catch (_) {} $("hf").value = ""; $("hf-save").textContent = getHf() ? "Token saved ✓" : "Use token"; });
+
+function tab(which){
+  const live = which === "live";
+  $("live").hidden = !live; $("sample").hidden = live;
+  $("tab-live").setAttribute("aria-selected", live); $("tab-sample").setAttribute("aria-selected", !live);
+  if (!live && !$("sample-story").children.length) loadSample();
+}
+$("tab-live").addEventListener("click", () => tab("live")); $("tab-sample").addEventListener("click", () => tab("sample"));
+
+function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function card(kind, title, desc, prompt, imgSrc, live){
+  const c = el("div", "card");
+  c.appendChild(el("div", "tag", kind)); c.appendChild(el("strong", null, title));
+  const shot = el("div", "shot"); shot.style.margin = "10px 0";
+  if (imgSrc) { const i = el("img"); i.src = imgSrc; i.alt = title; shot.appendChild(i); } else shot.textContent = live ? "No image yet" : "—";
+  c.appendChild(shot);
+  if (desc) c.appendChild(el("p", "muted", desc));
+  const d = el("details"); d.appendChild(el("summary", null, "Image prompt")); d.appendChild(el("p", "muted", prompt)); c.appendChild(d);
+  if (live) {
+    const b = el("button", "secondary", "Generate image"); b.type = "button"; const err = el("div", "err");
+    b.addEventListener("click", async () => {
+      b.disabled = true; b.textContent = "Generating…"; err.textContent = "";
+      try {
+        const r = await demoPost("/image", {prompt}, getHf() ? {"X-HF-Token": getHf()} : {});
+        shot.innerHTML = ""; const i = el("img"); i.src = r.image; i.alt = title; shot.appendChild(i); b.textContent = "Regenerate";
+      } catch (e) { err.textContent = e.message; b.textContent = "Generate image"; }
+      finally { b.disabled = false; }
+    });
+    c.appendChild(b); c.appendChild(err);
+  }
+  return c;
+}
+
+function renderStory(root, story, opts){
+  root.innerHTML = "";
+  root.appendChild(el("h2", null, "Characters")); const g1 = el("div", "cards");
+  (story.characters || []).forEach(ch => g1.appendChild(card("Character", ch.name, "", ch.characterPrompt, opts.img && opts.img(ch.characterId), opts.live)));
+  root.appendChild(g1);
+  root.appendChild(el("h2", null, "Scenes")); const g2 = el("div", "cards");
+  (story.scenes || []).forEach(sc => g2.appendChild(card("Scene " + sc.sceneNumber, sc.sceneDescription || ("Scene " + sc.sceneNumber), sc.audioText ? "Narration: " + sc.audioText : "", sc.settingPrompt, opts.img && opts.img("scene" + sc.sceneNumber), opts.live)));
+  root.appendChild(g2);
+}
+
+$("write").addEventListener("click", async () => {
+  $("write").disabled = true; $("err").textContent = ""; $("status").textContent = "Writing… (10–40 s)";
+  try { const r = await demoPost("/story", {theme: $("theme").value}); renderStory($("story"), r.story, {live: true}); }
+  catch (e) { $("err").textContent = e.message; }
+  finally { $("write").disabled = false; $("status").textContent = ""; }
+});
+
+async function loadSample(){
+  try {
+    const s = await (await fetch("sample/story_data.json")).json();
+    renderStory($("sample-story"), s, {live: false, img: (id) => "sample/" + id + ".jpg"});
+  } catch (e) { $("sample-story").textContent = "Could not load the sample."; }
+}
+</script>
+</body>
+</html>

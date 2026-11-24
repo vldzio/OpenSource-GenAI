@@ -44,6 +44,24 @@ python generate_images.py
 
 Images are saved to `generated_images/`, with an index in `generated_images/image_generation_results.json`.
 
+## Web demo
+
+A static UI in [`demo/`](demo) (Vercel) backed by a FastAPI service in [`demo_api/`](demo_api):
+
+- **Write story:** an LLM runs this repo's story prompt, optionally with a visitor's theme, and returns schema-validated JSON in the same structure as `story_data.json`.
+- **Generate image:** FLUX.1-schnell through Hugging Face Inference for any character or scene prompt, using the service's token (small daily allowance) or the visitor's own.
+- **Sample:** the story and images from this repo's committed run.
+
+LLM calls are traced in LangSmith. Run it locally:
+
+```bash
+pip install -r demo_api/requirements.txt pytest
+pytest tests
+uvicorn demo_api.app:app --port 8160
+```
+
+Set `API_URL` in `demo/config.js` to `http://localhost:8160` and serve `demo/` with `python -m http.server`. Deployment recipes: `deploy/space/`, `render.yaml` and `vercel.json`.
+
 ## Project structure
 
 | Path | Purpose |
@@ -53,8 +71,10 @@ Images are saved to `generated_images/`, with an index in `generated_images/imag
 | `story_data.json` | Example structured story |
 | `generated_images/` | Example character and scene images plus manifest |
 | `requirements.txt` | Python dependencies |
+| `demo/`, `demo_api/` | Web demo UI and API |
+| `deploy/`, `render.yaml`, `vercel.json` | Deployment recipes |
+| `tests/` | Demo API tests |
 
 ## Roadmap
 
-- Schema validation of the story JSON
 - Compositing characters into scene backgrounds for visual consistency
