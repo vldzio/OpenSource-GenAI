@@ -1,27 +1,13 @@
+import argparse
 import os
-import json
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Get API key from environment variable
-api_key = os.getenv("GOOGLE_API_KEY")
-
-if not api_key:
-    raise ValueError("GOOGLE_API_KEY not found in .env file")
-
-# Initialize the Gemini model
-gemini = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash", 
-    temperature=0.7,
-    google_api_key=api_key
-)
-
-# Define the prompt
-prompt = """
-Create a creative, engaging short story based on a theme of your choice.
+PROMPT_TEMPLATE = """
+Create a creative, engaging short story based on {theme_instruction}.
 Design the story to fit within a 30 to 60 second video duration and break it down into 3 to 6 distinct scenes.
 
 Return a JSON object with TWO main sections:
@@ -44,16 +30,16 @@ Return a JSON object with TWO main sections:
    - durationSeconds: Suggested duration in seconds
 
 Return the complete story as a JSON object in this exact structure:
-{
+{{
   "characters": [
-    {
+    {{
       "characterId": "char1",
       "name": "Character Name",
       "characterPrompt": "Detailed visual description for image generation..."
-    }
+    }}
   ],
   "scenes": [
-    {
+    {{
       "sceneNumber": 1,
       "sceneDescription": "...",
       "audioText": "...",
@@ -64,24 +50,40 @@ Return the complete story as a JSON object in this exact structure:
       "endingSettingPrompt": "...",
       "motionPrompt": "...",
       "durationSeconds": 10
-    }
+    }}
   ]
-}
+}}
 
 Ensure the story flows smoothly with a clear beginning, middle, and end. Use descriptive language that evokes emotions and paints clear imagery suitable for visual generation. Focus on imaginative and engaging themes with consistent character appearances across all scenes.
 """
 
-# Call Gemini API
-response = gemini.invoke(prompt)
 
-# Store the response content
-story_json = response.content
+def build_prompt(theme: str | None = None) -> str:
+    theme_instruction = f'the theme "{theme}"' if theme else "a theme of your choice"
+    return PROMPT_TEMPLATE.format(theme_instruction=theme_instruction)
 
-# Print and save the result
-print(story_json)
 
-# Save to file
-with open('story_data.json', 'w') as f:
-    f.write(story_json)
+def generate_story(theme: str | None = None, out_path: str = "story_data.json") -> str:
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY not found in .env file")
 
-print("\nStory saved to story_data.json")
+    gemini = ChatGoogleGenerativeAI(
+        model="gemini-2.0-flash",
+        temperature=0.7,
+        google_api_key=api_key,
+    )
+    story_json = gemini.invoke(build_prompt(theme)).content
+    print(story_json)
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(story_json)
+    print(f"\nStory saved to {out_path}")
+    return story_json
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate a structured story with Gemini.")
+    parser.add_argument("--theme", help="Story theme; Gemini picks one when omitted.")
+    args = parser.parse_args()
+    generate_story(args.theme)

@@ -6,13 +6,19 @@ from huggingface_hub import InferenceClient
 
 load_dotenv()
 
-# Configure Hugging Face Inference
-HF_TOKEN = os.getenv("HF_TOKEN")
-if not HF_TOKEN:
-    raise ValueError("HF_TOKEN not found in environment. Add it to your .env file.")
-
 MODEL_ID = "black-forest-labs/FLUX.1-schnell"
-client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
+_client = None
+
+
+def get_client() -> InferenceClient:
+    """Create the Hugging Face Inference client on first use."""
+    global _client
+    if _client is None:
+        hf_token = os.getenv("HF_TOKEN")
+        if not hf_token:
+            raise ValueError("HF_TOKEN not found in environment. Add it to your .env file.")
+        _client = InferenceClient(provider="hf-inference", api_key=hf_token)
+    return _client
 
 
 def clean_and_load_story(path="story_data.json"):
@@ -81,7 +87,7 @@ def generate_hf_image(prompt: str, filename: str, out_dir="generated_images"):
         print(f"  → Generating {filename}...")
         print(f"  → Prompt: {prompt[:80]}...")
         
-        image = client.text_to_image(prompt=prompt, model=MODEL_ID)
+        image = get_client().text_to_image(prompt=prompt, model=MODEL_ID)
         
         print(f"  → Image generated successfully")
         

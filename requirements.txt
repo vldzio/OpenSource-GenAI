@@ -1,0 +1,4 @@
+langchain-google-genai
+huggingface_hub
+python-dotenv
+pillow
